@@ -1,4 +1,6 @@
 -- Selecting the data we'll  be using in future queries.
+
+
 SELECT
   location, date, total_cases, new_cases, total_deaths, population
 FROM
@@ -8,9 +10,10 @@ ORDER BY
 
 
 
-
 -- Percentage of Total Deaths to Total Cases
 -- Provides an estimate of the chance of death had you contracted COVID at that time.
+
+
 SELECT
   location, date, total_cases, total_deaths, population, (total_deaths/total_cases)*100 as Death_Percentage
 FROM
@@ -22,9 +25,10 @@ ORDER BY
 
 
 
-
 -- Percentage of Total Cases to the Population
 -- Shows what percentage of the population contracted COVID.
+
+
 SELECT
   location, date, total_cases, population, (total_cases/population)*100 as Contraction_Percentage
 FROM
@@ -33,7 +37,6 @@ WHERE
   location = 'United States'
 ORDER BY
   1,2
-
 
 
 
@@ -51,7 +54,6 @@ ORDER BY
 
 
 
-
 -- Finding the countries with the highest death count compared to their population as a percentage.
 
 
@@ -63,6 +65,7 @@ GROUP BY
   location, population
 ORDER BY
   Population_Death_Percentage DESC
+
 
 
 -- Finding the total death count per continent.
@@ -80,6 +83,7 @@ ORDER BY
   Death_Count DESC
 
 
+
 -- Comparing total cases to total deaths per day on a global scale.
 
 
@@ -95,6 +99,7 @@ ORDER BY
   1
 
 
+
 -- Combining two datasets for further exploration.
 
 
@@ -106,6 +111,7 @@ JOIN
   data-projects-415122.covid_data.covid_vaccinations v 
   ON d.location = v.location
   AND d.date = v.date
+
 
 
 -- Finding the vaccinations per day plus the total rolling vaccination count per day per country.
@@ -123,6 +129,7 @@ WHERE
   d.continent is not null
 ORDER BY
   2,3
+
 
 
 -- Creating a CTE from the previous query to perform further calculations.

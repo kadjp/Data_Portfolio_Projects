@@ -1,0 +1,152 @@
+-- Selecting the data we'll  be using in future queries.
+SELECT
+  location, date, total_cases, new_cases, total_deaths, population
+FROM
+  data-projects-415122.covid_data.covid_deaths
+ORDER BY
+  1,2
+
+
+
+
+-- Percentage of Total Deaths to Total Cases
+-- Provides an estimate of the chance of death had you contracted COVID at that time.
+SELECT
+  location, date, total_cases, total_deaths, population, (total_deaths/total_cases)*100 as Death_Percentage
+FROM
+  data-projects-415122.covid_data.covid_deaths
+WHERE
+  location = 'United States'
+ORDER BY
+  1,2
+
+
+
+
+-- Percentage of Total Cases to the Population
+-- Shows what percentage of the population contracted COVID.
+SELECT
+  location, date, total_cases, population, (total_cases/population)*100 as Contraction_Percentage
+FROM
+  data-projects-415122.covid_data.covid_deaths
+WHERE
+  location = 'United States'
+ORDER BY
+  1,2
+
+
+
+
+-- Finding the countries with the highest contraction rate compared to their population as a percentage.
+
+
+SELECT
+  location, population, MAX(total_cases) as Highest_Contraction_Count, MAX((total_cases/population)*100) as Population_Contraction_Percentage
+FROM
+  data-projects-415122.covid_data.covid_deaths
+GROUP BY
+  location, population
+ORDER BY
+  Population_Contraction_Percentage DESC
+
+
+
+
+-- Finding the countries with the highest death count compared to their population as a percentage.
+
+
+SELECT
+  location, population, MAX(total_deaths) as Total_Death_Count, MAX((total_deaths/population)*100) as Population_Death_Percentage
+FROM
+  data-projects-415122.covid_data.covid_deaths
+GROUP BY
+  location, population
+ORDER BY
+  Population_Death_Percentage DESC
+
+
+-- Finding the total death count per continent.
+
+
+SELECT
+  continent, MAX(total_deaths) as Death_Count
+FROM
+  data-projects-415122.covid_data.covid_deaths
+WHERE
+  continent is not  null
+GROUP BY 
+  continent
+ORDER BY
+  Death_Count DESC
+
+
+-- Comparing total cases to total deaths per day on a global scale.
+
+
+SELECT
+  date, SUM(new_cases) as Total_Cases_Reported, SUM(new_deaths) as Total_Deaths_Reported, (SUM(new_deaths)/SUM(new_cases))*100 as Death_Percentage
+FROM
+  data-projects-415122.covid_data.covid_deaths
+WHERE
+  continent is not null
+GROUP BY
+  date
+ORDER BY
+  1
+
+
+-- Combining two datasets for further exploration.
+
+
+SELECT
+  *
+FROM
+  data-projects-415122.covid_data.covid_deaths d
+JOIN
+  data-projects-415122.covid_data.covid_vaccinations v 
+  ON d.location = v.location
+  AND d.date = v.date
+
+
+-- Finding the vaccinations per day plus the total rolling vaccination count per day per country.
+
+
+SELECT
+  d.continent, d.location, d.date, d.population, v.new_vaccinations, SUM(v.new_vaccinations) OVER (PARTITION BY d.location ORDER BY d.location, d.date) as Rolling_Vaccination_Count
+FROM
+  data-projects-415122.covid_data.covid_deaths d
+JOIN
+  data-projects-415122.covid_data.covid_vaccinations v 
+  ON d.location = v.location
+  AND d.date = v.date
+WHERE
+  d.continent is not null
+ORDER BY
+  2,3
+
+
+-- Creating a CTE from the previous query to perform further calculations.
+-- Finding the rolling vaccination percentage of vaccinated people to the total population per day per country.
+
+
+WITH tab AS
+(
+SELECT
+  d.continent, d.location, d.date, d.population, v.new_vaccinations, SUM(v.new_vaccinations) OVER (PARTITION BY d.location ORDER BY d.location, d.date) as Rolling_Vaccination_Count
+FROM
+  data-projects-415122.covid_data.covid_deaths d
+JOIN
+  data-projects-415122.covid_data.covid_vaccinations v 
+  ON d.location = v.location
+  AND d.date = v.date
+WHERE
+  d.continent is not null
+ORDER BY
+  2,3
+)
+SELECT
+  *, (Rolling_Vaccination_Count/Population)*100 as Rolling_Vaccination_Percentage
+FROM
+  tab
+
+

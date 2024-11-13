@@ -51,5 +51,3 @@ SELECT dept, AVG(Work_accident) AS avg_accident, ROUND(AVG(satisfaction_level),3
 FROM High_Low
 GROUP BY dept
 ORDER BY avg_dept_sat DESC; -- Comparing work_accidents with satisfaction scores
-
--- Count of salary ranges per department
